@@ -15,3 +15,15 @@ cc_library(
     compatible_with = get_compatible_with_portable(),
     copts = tflite_copts(),
 )
+
+cc_library(
+    name = "portable_tensor_utils",
+    srcs = [
+        "portable_tensor_utils.cc",
+    ],
+    hdrs = [
+        "portable_tensor_utils.h",
+    ],
+    compatible_with = get_compatible_with_portable(),
+    copts = tflite_copts(),
+)

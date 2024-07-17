@@ -30,11 +30,11 @@ cc_library(
     deps = [
         ":quantization_config",
         ":quantization_interfaces_inc_gen",
+        "//tensorflow/compiler/mlir/lite/kernels/internal:portable_tensor_utils",
         "//tensorflow/compiler/mlir/lite/quantization/ir:QuantOps",
         "//tensorflow/compiler/mlir/quantization/common/ir:QuantOps",
         "//tensorflow/core:lib_proto_parsing",
         "//tensorflow/core:protos_all_cc",
-        "//tensorflow/lite/kernels/internal:tensor_utils",
         "//tensorflow/lite/tools/optimize:quantization_utils",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
