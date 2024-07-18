@@ -51,6 +51,28 @@ class ConcreteShardingTest : public test_util::ShardingTest {};
 class ConcreteEvenShardingTest : public test_util::ShardingTest {};
 class ShardingParamShardingTest : public test_util::ShardingTest {};
 
+TEST_P(SingleDeviceShardingTest, Cast) {
+  auto device_list = GetDevices({0});
+  std::shared_ptr<const Sharding> sharding =
+      SingleDeviceSharding::Create(device_list.devices().front(), MemoryKind());
+  EXPECT_TRUE(sharding->isa<SingleDeviceSharding>());
+  EXPECT_FALSE(sharding->isa<OpaqueSharding>());
+
+  {
+    const auto* single_device_sharding =
+        sharding->dyn_cast<SingleDeviceSharding>();
+    EXPECT_TRUE(single_device_sharding->IsFullyReplicated());
+  }
+
+  EXPECT_EQ(sharding->dyn_cast<OpaqueSharding>(), nullptr);
+
+  {
+    const auto& single_device_sharding =
+        *sharding->cast<SingleDeviceSharding>();
+    EXPECT_TRUE(single_device_sharding.IsFullyReplicated());
+  }
+}
+
 TEST_P(SingleDeviceShardingTest, IsFullyReplicated) {
   auto device_list = GetDevices({0});
   std::shared_ptr<const Sharding> sharding =

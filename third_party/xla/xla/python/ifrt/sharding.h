@@ -124,6 +124,21 @@ class Sharding : public llvm::RTTIExtends<Sharding, Serializable> {
 
   static char ID;  // NOLINT
 
+  template <typename... Ts>
+  bool isa() const {
+    return llvm::isa<Ts...>(this);
+  }
+
+  template <typename T>
+  const T* dyn_cast() const {
+    return llvm::dyn_cast<T>(this);
+  }
+
+  template <typename T>
+  const T* cast() const {
+    return llvm::cast<T>(this);
+  }
+
  protected:
   Sharding(DeviceList devices, MemoryKind memory_kind, bool is_fully_replicated)
       : devices_(devices),
