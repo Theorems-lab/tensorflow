@@ -423,6 +423,14 @@ class HloTestBase : public ManifestCheckingTest {
   // Gets the instruction from the given module with the given opcode.
   HloInstruction* FindInstruction(HloModule* module, HloOpcode opcode);
 
+  // Check that one instruction comes before another one. The function returns
+  // true if the first instruction comes before the second one, and false if
+  // the second instruction comes before the first one or if either instruction
+  // is not found. This is useful for partial checks on the transformed IR
+  // without going through a full file check.
+  bool CheckInstructionOrder(HloModule* module, absl::string_view inst1,
+                             absl::string_view inst2);
+
   // Return an HLO verifier constructed for the test backend.
   HloVerifier& verifier() const { return *hlo_verifier_; }
 

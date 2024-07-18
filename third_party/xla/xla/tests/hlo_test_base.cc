@@ -1022,6 +1022,28 @@ HloInstruction* HloTestBase::FindInstruction(HloModule* module,
   return nullptr;
 }
 
+bool HloTestBase::CheckInstructionOrder(HloModule* module,
+                                        absl::string_view inst1,
+                                        absl::string_view inst2) {
+  int index1 = -1;
+  int index2 = -1;
+  int current_index = 0;
+  for (const HloComputation* c : module->computations()) {
+    for (auto instruction : c->instructions()) {
+      std::cout << instruction->name() << "\n";
+      if (instruction->name() == inst1) {
+        index1 = current_index;
+      }
+      if (instruction->name() == inst2) {
+        index2 = current_index;
+      }
+      current_index++;
+    }
+    current_index++;
+  }
+  return index1 < index2;
+}
+
 se::DeviceMemoryAllocator* HloTestBase::GetAllocator() {
   if (allocator_ == nullptr) {
     allocator_ = std::make_unique<se::StreamExecutorMemoryAllocator>(

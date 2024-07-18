@@ -139,30 +139,31 @@ TEST_F(CollectivePermuteCycleDecomposerTest, ForwardCycleWithWhileLoop) {
   HloModule test
 
   while_cond {
-    param = (u32[], f32[]) parameter(0)
+    param = (u32[], f32[2,2], f32[2,2]) parameter(0)
     iter = u32[] get-tuple-element(param), index=0
-    max_iter = u32[] constant(5)
+    max_iter = u32[] constant(3)
     ROOT cmp = pred[] compare(iter, max_iter), direction=LT
   }
 
   while_body {
-    param = (u32[], f32[]) parameter(0)
+    param = (u32[], f32[2,2], f32[2,2]) parameter(0)
     iter = u32[] get-tuple-element(param), index=0
-    data = f32[] get-tuple-element(param), index=1
-    ten = f32[] constant(10)
-    sum = f32[] add(data, ten)
-    cp = f32[] collective-permute(sum), channel_id=1, source_target_pairs={{0,1}, {1,2}, {2,3}, {3,0}}
+    data = f32[2,2] get-tuple-element(param), index=1
+    weights = f32[2,2] get-tuple-element(param), index=2
+    matmul = f32[2,2] dot(weights, data), lhs_contracting_dims={1}, rhs_contracting_dims={0}
+    cp = f32[2,2] collective-permute(matmul), channel_id=1, source_target_pairs={{0,1}, {1,2}, {2,3}, {3,0}}
     iter_increment = u32[] constant(1)
     next_iter = u32[] add(iter, iter_increment)
-    ROOT result = (u32[], f32[]) tuple(next_iter, cp)
+    ROOT result = (u32[], f32[2,2], f32[2,2]) tuple(next_iter, cp, weights)
   }
 
   ENTRY test_computation {
     iter = u32[] constant(0)
-    data = f32[] parameter(0)
-    input = (u32[], f32[]) tuple(iter, data)
-    while_res = (u32[], f32[]) while(input), condition=while_cond, body=while_body
-    ROOT data_out = f32[] get-tuple-element(while_res), index=1
+    data = f32[2,2] parameter(0)
+    weights = f32[2,2] parameter(1)
+    input = (u32[], f32[2,2], f32[2,2]) tuple(iter, data, weights)
+    while_res = (u32[], f32[2,2], f32[2,2]) while(input), condition=while_cond, body=while_body
+    ROOT data_out = f32[2,2] get-tuple-element(while_res), index=1
   }
   )";
   TF_ASSERT_OK_AND_ASSIGN(std::unique_ptr<HloModule> module,
@@ -179,6 +180,8 @@ TEST_F(CollectivePermuteCycleDecomposerTest, ForwardCycleWithWhileLoop) {
   EXPECT_THAT(cp1->ToString(), HasSubstr("source_target_pairs={{3,0}}"));
   EXPECT_THAT(cp2->ToString(),
               HasSubstr("source_target_pairs={{0,1},{1,2},{2,3}}"));
+  std::string module_str = module->ToString();
+  std::cout << module_str << std::endl;
 }
 
 TEST_F(CollectivePermuteCycleDecomposerTest, BackwardCycle) {
