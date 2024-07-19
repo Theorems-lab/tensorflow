@@ -3173,3 +3173,15 @@ bzl_library(
         "@local_tsl//tsl/platform:build_config_root_bzl",
     ] + tests_build_defs_bzl_deps(),
 )
+
+xla_cc_test(
+    name = "hlo_sharding_test",
+    srcs = ["hlo_sharding_test.cc"],
+    deps = [
+        ":xla_internal_test_main",
+        "//xla:array",
+        "//xla:array3d",
+        "//xla:test",
+        "//xla/hlo/ir:hlo",
+    ],
+)
